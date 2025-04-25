@@ -4,7 +4,7 @@
 - 💞️ I’m looking to collaborate on creating a telegramm chat- bot
 - 📫 How to reach me: tg- @selfo_s, vk- Руслан Среда
 - 😄 Pronouns: he
-- ⚡ Fun fact: I 
+- ⚡ Fun fact: I'm crazy about cats.
 
 <!---
 Sughi-code/Sughi-code is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
