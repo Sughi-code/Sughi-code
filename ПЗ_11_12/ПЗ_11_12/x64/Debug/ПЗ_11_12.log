@@ -1,0 +1,17 @@
+﻿  Source.cpp
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(6,12): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(7,12): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(14,13): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(14,21): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(15,18): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(15,26): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(16,18): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(16,27): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(40,12): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(40,20): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(41,17): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(41,25): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(42,17): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(42,26): warning C4244: аргумент: преобразование "long double" в "const unsigned __int64", возможна потеря данных
+D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\ПЗ_11_12\Source.cpp(47,1): warning C4715: find: значение возвращается не при всех путях выполнения
+  ПЗ_11_12.vcxproj -> D:\Programming\C++\Visual_Studio_Projects\ПЗ_11_12\x64\Debug\ПЗ_11_12.exe
