@@ -2,7 +2,6 @@
 - 👀 I’m interested in reading and logic of world
 - 🌱 I’m currently learning math and programming
 - 💞️ I’m looking to collaborate on creating a telegramm chat- bot
-- 📫 How to reach me: tg- @selfo_s, vk- Руслан Среда
 - 😄 Pronouns: he
 - ⚡ Fun fact: I'm crazy about cats.
 
