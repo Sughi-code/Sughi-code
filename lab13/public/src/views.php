@@ -4,56 +4,139 @@ ini_set('display_errors', '1');
 
 /**
  * Генерация HTML для главной страницы
- * @param array $people Массив данных о людях
+ * @param array $tenants Массив арендаторов
+ * @param array $properties Массив недвижимости
+ * @param array $rentalInfos Массив информации об аренде
  * @return string HTML содержимое
  */
-function renderIndexView(array $people): string
+function renderIndexView(array $tenants, array $properties, array $rentalInfos): string
 {
     ob_start();
     ?>
-    <h2>Список людей</h2>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ФИО</th>
-                    <th>Вес (кг)</th>
-                    <th>Рост (см)</th>
-                    <th>Дата рождения</th>
-                    <th>Возраст</th>
-                    <th>Пол</th>
-                    <th>Место рождения</th>
-                    <th>Возрастная группа</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($people as $person): ?>
-                    <?php
-                        $birthDate = new DateTime($person['birth_date']);
-                        $today = new DateTime();
-                        $age = $today->diff($birthDate)->y;
-                    ?>
+    <h2>База данных аренды</h2>
+    
+    <div class="section">
+        <h3>Арендаторы</h3>
+        <div class="table-container">
+            <table>
+                <thead>
                     <tr>
-                        <td><?= htmlspecialchars($person['id']) ?></td>
-                        <td><?= htmlspecialchars($person['full_name']) ?></td>
-                        <td><?= htmlspecialchars($person['weight']) ?></td>
-                        <td><?= htmlspecialchars($person['height']) ?></td>
-                        <td><?= htmlspecialchars($person['birth_date']) ?></td>
-                        <td><?= $age ?></td>
-                        <td><?= $person['gender'] === 'male' ? 'Мужской' : 'Женский' ?></td>
-                        <td><?= htmlspecialchars($person['birth_place']) ?></td>
-                        <td><?= htmlspecialchars($person['age_group_name']) ?></td>
+                        <th>ID</th>
+                        <th>Код арендатора</th>
+                        <th>Фамилия</th>
+                        <th>Дата создания</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($tenants as $tenant): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($tenant['id']) ?></td>
+                        <td><?= htmlspecialchars($tenant['code']) ?></td>
+                        <td><?= htmlspecialchars($tenant['last_name']) ?></td>
+                        <td><?= htmlspecialchars($tenant['created_at']) ?></td>
                         <td>
-                            <form method="POST" action="/delete/<?= $person['id'] ?>" style="display: inline;">
-                                <button type="submit" class="btn-delete" onclick="return confirm('Вы уверены, что хотите удалить эту запись?')">Удалить</button>
+                            <form method="POST" action="/delete-tenant/<?= $tenant['id'] ?>" style="display: inline;">
+                                <button type="submit" class="btn-delete" onclick="return confirm('Вы уверены, что хотите удалить этого арендатора?')">Удалить</button>
                             </form>
                         </td>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Недвижимость</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Код недвижимости</th>
+                        <th>Тип</th>
+                        <th>Ежемесячная арендная плата</th>
+                        <th>Дата создания</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($properties as $property): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($property['id']) ?></td>
+                        <td><?= htmlspecialchars($property['code']) ?></td>
+                        <td><?= htmlspecialchars($property['type']) ?></td>
+                        <td><?= number_format($property['monthly_rent'], 2, '.', ' ') ?></td>
+                        <td><?= htmlspecialchars($property['created_at']) ?></td>
+                        <td>
+                            <form method="POST" action="/delete-property/<?= $property['id'] ?>" style="display: inline;">
+                                <button type="submit" class="btn-delete" onclick="return confirm('Вы уверены, что хотите удалить эту недвижимость?')">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>Информация об аренде</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ID Арендатора</th>
+                        <th>ID Недвижимости</th>
+                        <th>Дата начала аренды</th>
+                        <th>Срок аренды (мес)</th>
+                        <th>Дата создания</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($rentalInfos as $rentalInfo): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($rentalInfo['id']) ?></td>
+                        <td><?= htmlspecialchars($rentalInfo['tenant_id']) ?></td>
+                        <td><?= htmlspecialchars($rentalInfo['property_id']) ?></td>
+                        <td><?= htmlspecialchars($rentalInfo['start_date']) ?></td>
+                        <td><?= htmlspecialchars($rentalInfo['lease_term']) ?></td>
+                        <td><?= htmlspecialchars($rentalInfo['created_at']) ?></td>
+                        <td>
+                            <form method="POST" action="/delete-rental-info/<?= $rentalInfo['id'] ?>" style="display: inline;">
+                                <button type="submit" class="btn-delete" onclick="return confirm('Вы уверены, что хотите удалить эту информацию об аренде?')">Удалить</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <a href="/add-tenant" class="btn-primary">Добавить арендатора</a>
+        <a href="/add-property" class="btn-primary">Добавить недвижимость</a>
+        <a href="/add-rental-info" class="btn-primary">Добавить информацию об аренде</a>
+    </div>
+    
+    <div class="reports-section">
+        <h3>Отчеты</h3>
+        <div class="reports-grid">
+            <a href="/report/property-type" class="report-link">Список недвижимости определенного типа</a>
+            <a href="/report/tenants-for-properties" class="report-link">Арендаторы для каждой недвижимости</a>
+            <a href="/report/properties-never-rented" class="report-link">Недвижимость, которая никогда не сдавалась</a>
+            <a href="/report/properties-rented-more-than-3-times" class="report-link">Недвижимость, сдававшаяся более 3 раз</a>
+            <a href="/report/properties-rented-more-than-2-times-with-long-term" class="report-link">Недвижимость с долгосрочной арендой</a>
+            <a href="/report/properties-with-rental-stats" class="report-link">Статистика по недвижимости</a>
+            <a href="/report/tenants-with-rental-stats" class="report-link">Статистика по арендаторам</a>
+            <a href="/report/rented-properties-by-type-and-quarter" class="report-link">Арендованные недвижимости за квартал</a>
+            <a href="/report/tenants-with-different-properties" class="report-link">Арендаторы и разные недвижимости</a>
+            <a href="/report/adjusted-rents" class="report-link">Обновленная арендная плата</a>
+        </div>
     </div>
     <?php
     return ob_get_clean();
@@ -461,24 +544,33 @@ function renderLayout(string $view, array $data = []): string
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>База данных "Перепись"</title>
+        <title>База данных аренды</title>
         <link rel="stylesheet" href="/style.css">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body>
         <div class="container">
             <header>
-                <h1>База данных "Перепись"</h1>
+                <h1>База данных аренды</h1>
                 <nav>
                     <ul>
                         <li><a href="/">Главная</a></li>
-                        <li><a href="/add">Добавить человека</a></li>
+                        <li><a href="/add-tenant">Добавить арендатора</a></li>
+                        <li><a href="/add-property">Добавить недвижимость</a></li>
+                        <li><a href="/add-rental-info">Добавить аренду</a></li>
                         <li class="dropdown">
                             <a href="javascript:void(0)">Отчеты</a>
                             <div class="dropdown-content">
-                                <a href="/report/age">Люди старше указанного возраста</a>
-                                <a href="/report/gender-stats">Средние показатели по полу</a>
-                                <a href="/report/weight-above-avg">Вес выше среднего по возрастным группам</a>
+                                <a href="/report/property-type">Недвижимость определенного типа</a>
+                                <a href="/report/tenants-for-properties">Арендаторы для каждой недвижимости</a>
+                                <a href="/report/properties-never-rented">Недвижимость, которая никогда не сдавалась</a>
+                                <a href="/report/properties-rented-more-than-3-times">Недвижимость, сдававшаяся более 3 раз</a>
+                                <a href="/report/properties-rented-more-than-2-times-with-long-term">Недвижимость с долгосрочной арендой</a>
+                                <a href="/report/properties-with-rental-stats">Статистика по недвижимости</a>
+                                <a href="/report/tenants-with-rental-stats">Статистика по арендаторам</a>
+                                <a href="/report/rented-properties-by-type-and-quarter">Арендованные недвижимости за квартал</a>
+                                <a href="/report/tenants-with-different-properties">Арендаторы и разные недвижимости</a>
+                                <a href="/report/adjusted-rents">Обновленная арендная плата</a>
                             </div>
                         </li>
                     </ul>
@@ -510,26 +602,83 @@ function renderLayout(string $view, array $data = []): string
                 <?php
                 switch ($view) {
                     case 'index':
-                        echo renderIndexView($people ?? []);
+                        echo renderIndexView(
+                            $tenants ?? [],
+                            $properties ?? [],
+                            $rentalInfos ?? []
+                        );
                         break;
-                    case 'add':
-                        echo renderAddView(
-                            $ageGroups ?? [],
+                    case 'add_tenant':
+                        echo renderAddTenantView(
                             $errors ?? [],
                             $formData ?? []
                         );
                         break;
-                    case 'delete':
-                        echo renderDeleteView($person ?? []);
+                    case 'add_property':
+                        echo renderAddPropertyView(
+                            $errors ?? [],
+                            $formData ?? []
+                        );
                         break;
-                    case 'report_age':
-                        echo renderAgeReportView($minAge ?? 18, $count ?? 0);
+                    case 'add_rental_info':
+                        echo renderAddRentalInfoView(
+                            $tenants ?? [],
+                            $properties ?? [],
+                            $errors ?? [],
+                            $formData ?? []
+                        );
                         break;
-                    case 'report_gender_stats':
-                        echo renderGenderStatsReportView($stats ?? []);
+                    case 'delete_tenant':
+                        echo renderDeleteTenantView($tenant ?? []);
                         break;
-                    case 'report_weight_above_avg':
-                        echo renderWeightAboveAvgReportView($stats ?? []);
+                    case 'delete_property':
+                        echo renderDeletePropertyView($property ?? []);
+                        break;
+                    case 'delete_rental_info':
+                        echo renderDeleteRentalInfoView($rental_info ?? []);
+                        break;
+                    case 'report_property_type':
+                        echo renderPropertyTypeReportView(
+                            $properties ?? [],
+                            $type ?? '',
+                            $sortBy ?? 'type'
+                        );
+                        break;
+                    case 'report_tenants_for_properties':
+                        echo renderTenantsForPropertiesReportView($tenantsForProperties ?? []);
+                        break;
+                    case 'report_properties_never_rented':
+                        echo renderPropertiesNeverRentedReportView($properties ?? []);
+                        break;
+                    case 'report_properties_rented_more_than_3_times':
+                        echo renderPropertiesRentedMoreThan3TimesReportView($properties ?? []);
+                        break;
+                    case 'report_properties_rented_more_than_2_times_with_long_term':
+                        echo renderPropertiesRentedMoreThan2TimesWithLongTermReportView($properties ?? []);
+                        break;
+                    case 'report_properties_with_rental_stats':
+                        echo renderPropertiesWithRentalStatsReportView($properties ?? []);
+                        break;
+                    case 'report_tenants_with_rental_stats':
+                        echo renderTenantsWithRentalStatsReportView($tenants ?? []);
+                        break;
+                    case 'report_rented_properties_by_type_and_quarter':
+                        echo renderRentedPropertiesByTypeAndQuarterReportView(
+                            $properties ?? [],
+                            $propertyType ?? '',
+                            $year ?? date('Y'),
+                            $quarter ?? 1,
+                            $years ?? []
+                        );
+                        break;
+                    case 'report_tenants_with_different_properties':
+                        echo renderTenantsWithDifferentPropertiesReportView($tenants ?? []);
+                        break;
+                    case 'report_adjusted_rents':
+                        echo renderAdjustedRentsReportView(
+                            $properties ?? [],
+                            $propertyType ?? ''
+                        );
                         break;
                     case '404':
                         echo render404View($data ?? []);
@@ -541,7 +690,7 @@ function renderLayout(string $view, array $data = []): string
             </main>
             
             <footer>
-                <p>&copy; <?= date('Y') ?> База данных "Перепись". Все права защищены.</p>
+                <p>&copy; <?= date('Y') ?> База данных аренды. Все права защищены.</p>
             </footer>
         </div>
     </body>

@@ -2,10 +2,10 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-define('DB_HOST', '127.127.126.31');
+define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'census_db');
+define('DB_NAME', 'rent_db');
 define('DB_CHARSET', 'utf8mb4');
 
 /**
@@ -32,5 +32,6 @@ function getDBConnection(): PDO
     }
 }
 
-$databaseConnection = getDBConnection();
+// Удаляем глобальную переменную $databaseConnection, чтобы подключение было ленивым
+// $databaseConnection = getDBConnection();
 ?>

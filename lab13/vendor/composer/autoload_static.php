@@ -11,22 +11,22 @@ class ComposerStaticInite69e44c33f47bbf346dab01e67ab6f02
     );
 
     public static $prefixLengthsPsr4 = array (
-        'F' =>
+        'F' => 
         array (
             'FastRoute\\' => 10,
         ),
-        'A' =>
+        'A' => 
         array (
             'App\\' => 4,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'FastRoute\\' =>
+        'FastRoute\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/fast-route/src',
         ),
-        'App\\' =>
+        'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/public/src',
         ),

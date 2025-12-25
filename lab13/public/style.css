@@ -332,6 +332,56 @@ table tr:hover {
     background-color: #f8f9fa;
 }
 
+/* Стили для разделов */
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h3 {
+    margin-bottom: 1rem;
+    color: #495057;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+/* Стили для действий */
+.actions {
+    margin: 2rem 0;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Стили для отчетов */
+.reports-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.report-link {
+    display: block;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.report-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
 /* Стили для графиков */
 .chart-container {
     margin-top: 2rem;
