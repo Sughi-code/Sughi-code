@@ -6,14 +6,14 @@ require_once __DIR__ . '/models.php';
 require_once __DIR__ . '/views.php';
 
 /**
- * Контроллер для работы с базой данных переписи
+ * Контроллер для работы с базой данных аренды
  */
-class CensusController
+class RentalController
 {
     /**
      * Репозиторий для работы с данными
      */
-    private PersonRepository $repository;
+    private RentalRepository $repository;
     
     /**
      * Конструктор контроллера
@@ -21,27 +21,32 @@ class CensusController
      */
     public function __construct(PDO $db)
     {
-        $this->repository = new PersonRepository($db);
+        $this->repository = new RentalRepository($db);
     }
     
     /**
-     * Отображение главной страницы со списком людей
+     * Отображение главной страницы
      */
     public function index(): void
     {
-        $people = $this->repository->getAll();
-        $html = renderLayout('index', ['people' => $people]);
+        $tenants = $this->repository->getAllTenants();
+        $properties = $this->repository->getAllProperties();
+        $rentalInfos = $this->repository->getAllRentalInfos();
+        
+        $html = renderLayout('index', [
+            'tenants' => $tenants,
+            'properties' => $properties,
+            'rentalInfos' => $rentalInfos
+        ]);
         echo $html;
     }
     
     /**
-     * Отображение формы добавления человека
+     * Отображение формы добавления арендатора
      */
-    public function showAddForm(): void
+    public function showAddTenantForm(): void
     {
-        $ageGroups = $this->repository->getAgeGroups();
-        $html = renderLayout('add', [
-            'ageGroups' => $ageGroups,
+        $html = renderLayout('add_tenant', [
             'errors' => [],
             'formData' => []
         ]);
@@ -49,51 +54,63 @@ class CensusController
     }
     
     /**
-     * Добавление нового человека
+     * Отображение формы добавления недвижимости
      */
-    public function addPerson(): void
+    public function showAddPropertyForm(): void
     {
-        $ageGroups = $this->repository->getAgeGroups();
+        $html = renderLayout('add_property', [
+            'errors' => [],
+            'formData' => []
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение формы добавления арендной информации
+     */
+    public function showAddRentalInfoForm(): void
+    {
+        $tenants = $this->repository->getAllTenants();
+        $properties = $this->repository->getAllProperties();
+        
+        $html = renderLayout('add_rental_info', [
+            'tenants' => $tenants,
+            'properties' => $properties,
+            'errors' => [],
+            'formData' => []
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Добавление нового арендатора
+     */
+    public function addTenant(): void
+    {
         $errors = [];
         $formData = $_POST ?? [];
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $fullName = trim($_POST['full_name'] ?? '');
-            $weight = trim($_POST['weight'] ?? '');
-            $height = trim($_POST['height'] ?? '');
-            $birthDate = trim($_POST['birth_date'] ?? '');
-            $gender = $_POST['gender'] ?? '';
-            $birthPlace = trim($_POST['birth_place'] ?? '');
-            $ageGroupId = $_POST['age_group_id'] ?? '';
+            $code = trim($_POST['code'] ?? '');
+            $lastName = trim($_POST['last_name'] ?? '');
             
             // Валидация данных
-            if (empty($fullName)) $errors[] = 'ФИО обязательно для заполнения';
-            if (empty($weight) || !is_numeric($weight) || (float)$weight <= 0) $errors[] = 'Вес должен быть положительным числом';
-            if (empty($height) || !is_numeric($height) || (float)$height <= 0) $errors[] = 'Рост должен быть положительным числом';
-            if (empty($birthDate)) $errors[] = 'Дата рождения обязательна';
-            if (!in_array($gender, ['male', 'female'])) $errors[] = 'Некорректный пол';
-            if (empty($birthPlace)) $errors[] = 'Место рождения обязательно';
-            if (empty($ageGroupId) || !is_numeric($ageGroupId) || (int)$ageGroupId <= 0) $errors[] = 'Выберите возрастную группу';
+            if (empty($code)) $errors[] = 'Код арендатора обязателен для заполнения';
+            if (empty($lastName)) $errors[] = 'Фамилия арендатора обязательна для заполнения';
             
             if (empty($errors)) {
                 $data = [
-                    'full_name' => $fullName,
-                    'weight' => (float)$weight,
-                    'height' => (float)$height,
-                    'birth_date' => $birthDate,
-                    'gender' => $gender,
-                    'birth_place' => $birthPlace,
-                    'age_group_id' => (int)$ageGroupId
+                    'code' => $code,
+                    'last_name' => $lastName
                 ];
                 
-                $id = $this->repository->create($data);
-                header('Location: /?success=1');
+                $id = $this->repository->createTenant($data);
+                header('Location: /?success=tenant_added');
                 exit;
             }
         }
         
-        $html = renderLayout('add', [
-            'ageGroups' => $ageGroups,
+        $html = renderLayout('add_tenant', [
             'errors' => $errors,
             'formData' => $formData
         ]);
@@ -101,69 +118,323 @@ class CensusController
     }
     
     /**
-     * Удаление человека по идентификатору
-     * @param string $id Идентификатор записи
+     * Добавление новой недвижимости
      */
-    public function deletePerson(string $id): void
+    public function addProperty(): void
+    {
+        $errors = [];
+        $formData = $_POST ?? [];
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $code = trim($_POST['code'] ?? '');
+            $type = trim($_POST['type'] ?? '');
+            $monthlyRent = trim($_POST['monthly_rent'] ?? '');
+            
+            // Валидация данных
+            if (empty($code)) $errors[] = 'Код недвижимости обязателен для заполнения';
+            if (empty($type)) $errors[] = 'Тип недвижимости обязателен для заполнения';
+            if (empty($monthlyRent) || !is_numeric($monthlyRent) || (float)$monthlyRent <= 0) $errors[] = 'Ежемесячная арендная плата должна быть положительным числом';
+            
+            if (empty($errors)) {
+                $data = [
+                    'code' => $code,
+                    'type' => $type,
+                    'monthly_rent' => (float)$monthlyRent
+                ];
+                
+                $id = $this->repository->createProperty($data);
+                header('Location: /?success=property_added');
+                exit;
+            }
+        }
+        
+        $html = renderLayout('add_property', [
+            'errors' => $errors,
+            'formData' => $formData
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Добавление новой арендной информации
+     */
+    public function addRentalInfo(): void
+    {
+        $tenants = $this->repository->getAllTenants();
+        $properties = $this->repository->getAllProperties();
+        $errors = [];
+        $formData = $_POST ?? [];
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $tenantId = $_POST['tenant_id'] ?? '';
+            $propertyId = $_POST['property_id'] ?? '';
+            $startDate = trim($_POST['start_date'] ?? '');
+            $leaseTerm = trim($_POST['lease_term'] ?? '');
+            
+            // Валидация данных
+            if (empty($tenantId) || !is_numeric($tenantId) || (int)$tenantId <= 0) $errors[] = 'Выберите арендатора';
+            if (empty($propertyId) || !is_numeric($propertyId) || (int)$propertyId <= 0) $errors[] = 'Выберите недвижимость';
+            if (empty($startDate)) $errors[] = 'Дата начала аренды обязательна';
+            if (empty($leaseTerm) || !is_numeric($leaseTerm) || (int)$leaseTerm <= 0) $errors[] = 'Срок аренды должен быть положительным числом';
+            
+            if (empty($errors)) {
+                $data = [
+                    'tenant_id' => (int)$tenantId,
+                    'property_id' => (int)$propertyId,
+                    'start_date' => $startDate,
+                    'lease_term' => (int)$leaseTerm
+                ];
+                
+                $id = $this->repository->createRentalInfo($data);
+                header('Location: /?success=rental_info_added');
+                exit;
+            }
+        }
+        
+        $html = renderLayout('add_rental_info', [
+            'tenants' => $tenants,
+            'properties' => $properties,
+            'errors' => $errors,
+            'formData' => $formData
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Удаление арендатора по идентификатору
+     * @param string $id Идентификатор арендатора
+     */
+    public function deleteTenant(string $id): void
     {
         if (!is_numeric($id) || (int)$id <= 0) {
             header('Location: /?error=invalid_id');
             exit;
         }
         
-        $personId = (int)$id;
+        $tenantId = (int)$id;
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if ($this->repository->delete($personId)) {
-                header('Location: /?deleted=1');
+            if ($this->repository->deleteTenant($tenantId)) {
+                header('Location: /?deleted=tenant');
             } else {
                 header('Location: /?error=not_found');
             }
             exit;
         }
         
-        $person = $this->repository->getById($personId);
+        $tenant = $this->repository->getTenantById($tenantId);
         
-        if (!$person) {
+        if (!$tenant) {
             header('Location: /?error=not_found');
             exit;
         }
         
-        $html = renderLayout('delete', ['person' => $person]);
+        $html = renderLayout('delete_tenant', ['tenant' => $tenant]);
         echo $html;
     }
     
     /**
-     * Отображение отчета по возрасту
+     * Удаление недвижимости по идентификатору
+     * @param string $id Идентификатор недвижимости
      */
-    public function showAgeReport(): void
+    public function deleteProperty(string $id): void
     {
-        $minAge = isset($_GET['min_age']) && is_numeric($_GET['min_age']) && (int)$_GET['min_age'] >= 0 
-            ? (int)$_GET['min_age'] 
-            : 18;
+        if (!is_numeric($id) || (int)$id <= 0) {
+            header('Location: /?error=invalid_id');
+            exit;
+        }
         
-        $count = $this->repository->countPeopleOlderThan($minAge);
-        $html = renderLayout('report_age', ['minAge' => $minAge, 'count' => $count]);
+        $propertyId = (int)$id;
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($this->repository->deleteProperty($propertyId)) {
+                header('Location: /?deleted=property');
+            } else {
+                header('Location: /?error=not_found');
+            }
+            exit;
+        }
+        
+        $property = $this->repository->getPropertyById($propertyId);
+        
+        if (!$property) {
+            header('Location: /?error=not_found');
+            exit;
+        }
+        
+        $html = renderLayout('delete_property', ['property' => $property]);
         echo $html;
     }
     
     /**
-     * Отображение отчета по полу
+     * Удаление арендной информации по идентификатору
+     * @param string $id Идентификатор арендной информации
      */
-    public function showGenderStatsReport(): void
+    public function deleteRentalInfo(string $id): void
     {
-        $stats = $this->repository->getAverageStatsByGender();
-        $html = renderLayout('report_gender_stats', ['stats' => $stats]);
+        if (!is_numeric($id) || (int)$id <= 0) {
+            header('Location: /?error=invalid_id');
+            exit;
+        }
+        
+        $rentalInfoId = (int)$id;
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($this->repository->deleteRentalInfo($rentalInfoId)) {
+                header('Location: /?deleted=rental_info');
+            } else {
+                header('Location: /?error=not_found');
+            }
+            exit;
+        }
+        
+        $rentalInfo = $this->repository->getRentalInfoById($rentalInfoId);
+        
+        if (!$rentalInfo) {
+            header('Location: /?error=not_found');
+            exit;
+        }
+        
+        $html = renderLayout('delete_rental_info', ['rental_info' => $rentalInfo]);
+        echo $html;
+    }
+    
+    // Отчеты
+    
+    /**
+     * Отображение отчета: список недвижимости определенного типа
+     */
+    public function showPropertyTypeReport(): void
+    {
+        $type = $_GET['type'] ?? '';
+        $sortBy = $_GET['sort_by'] ?? 'type';
+        
+        $properties = $this->repository->getPropertiesByType($type, $sortBy);
+        $html = renderLayout('report_property_type', [
+            'properties' => $properties,
+            'type' => $type,
+            'sortBy' => $sortBy
+        ]);
         echo $html;
     }
     
     /**
-     * Отображение отчета по весу выше среднего
+     * Отображение отчета: список арендаторов для каждой недвижимости
      */
-    public function showWeightAboveAvgReport(): void
+    public function showTenantsForPropertiesReport(): void
     {
-        $stats = $this->repository->getPeopleWithWeightAboveAverageByAgeGroup();
-        $html = renderLayout('report_weight_above_avg', ['stats' => $stats]);
+        $tenantsForProperties = $this->repository->getTenantsForProperties();
+        $html = renderLayout('report_tenants_for_properties', [
+            'tenantsForProperties' => $tenantsForProperties
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список недвижимости, которая никогда не сдавалась
+     */
+    public function showPropertiesNeverRentedReport(): void
+    {
+        $properties = $this->repository->getPropertiesNeverRented();
+        $html = renderLayout('report_properties_never_rented', [
+            'properties' => $properties
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список недвижимости, которая сдавалась более 3 раз
+     */
+    public function showPropertiesRentedMoreThan3TimesReport(): void
+    {
+        $properties = $this->repository->getPropertiesRentedMoreThan3Times();
+        $html = renderLayout('report_properties_rented_more_than_3_times', [
+            'properties' => $properties
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список недвижимости, которая сдавалась более 2 раз и со сроком аренды более 1 года
+     */
+    public function showPropertiesRentedMoreThan2TimesWithLongTermReport(): void
+    {
+        $properties = $this->repository->getPropertiesRentedMoreThan2TimesWithLongTerm();
+        $html = renderLayout('report_properties_rented_more_than_2_times_with_long_term', [
+            'properties' => $properties
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список недвижимости с количеством аренд и общей суммой аренды
+     */
+    public function showPropertiesWithRentalStatsReport(): void
+    {
+        $properties = $this->repository->getPropertiesWithRentalStats();
+        $html = renderLayout('report_properties_with_rental_stats', [
+            'properties' => $properties
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список арендаторов с количеством аренд и средним сроком аренды
+     */
+    public function showTenantsWithRentalStatsReport(): void
+    {
+        $tenants = $this->repository->getTenantsWithRentalStats();
+        $html = renderLayout('report_tenants_with_rental_stats', [
+            'tenants' => $tenants
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список всех арендованных недвижимостей указанного типа за указанный год и квартал
+     */
+    public function showRentedPropertiesByTypeAndQuarterReport(): void
+    {
+        $propertyType = $_GET['property_type'] ?? '';
+        $year = isset($_GET['year']) && is_numeric($_GET['year']) ? (int)$_GET['year'] : date('Y');
+        $quarter = isset($_GET['quarter']) && is_numeric($_GET['quarter']) && $_GET['quarter'] >= 1 && $_GET['quarter'] <= 4 
+                   ? (int)$_GET['quarter'] : 1;
+        
+        $properties = $this->repository->getRentedPropertiesByTypeAndQuarter($propertyType, $year, $quarter);
+        $years = $this->repository->getYearsWithRentals();
+        $html = renderLayout('report_rented_properties_by_type_and_quarter', [
+            'properties' => $properties,
+            'propertyType' => $propertyType,
+            'year' => $year,
+            'quarter' => $quarter,
+            'years' => $years
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: список арендаторов и количество различных недвижимостей, которые они арендуют
+     */
+    public function showTenantsWithDifferentPropertiesReport(): void
+    {
+        $tenants = $this->repository->getTenantsWithDifferentProperties();
+        $html = renderLayout('report_tenants_with_different_properties', [
+            'tenants' => $tenants
+        ]);
+        echo $html;
+    }
+    
+    /**
+     * Отображение отчета: обновленная арендная плата для определенных типов недвижимости (увеличенная на 12%)
+     */
+    public function showAdjustedRentsReport(): void
+    {
+        $propertyType = $_GET['property_type'] ?? '';
+        $properties = $this->repository->getAdjustedRents($propertyType);
+        $html = renderLayout('report_adjusted_rents', [
+            'properties' => $properties,
+            'propertyType' => $propertyType
+        ]);
         echo $html;
     }
 }
