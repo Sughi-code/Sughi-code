@@ -1,0 +1,12 @@
+```
+# Logs
+*.log
+
+# Dependencies
+vendor/
+
+# Environment
+.env
+.env.local
+*.env.*
+```
